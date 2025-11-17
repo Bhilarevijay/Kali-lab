@@ -1,0 +1,65 @@
+sudo apt install -y wireshark tcpdump arpwatch arping nmap iproute2 net-tools
+
+Step 2: Check Network Interface
+
+ip -br a
+(Example: eth0, ens33, wlan0)
+
+Step 3: View ARP Table
+Display ARP cache:
+
+ip neigh show
+arp -n
+
+Observe IP and MAC mappings.
+
+Step 4: Monitor ARP Table in Real Time
+watch -n 1 "ip neigh show"
+
+Check for changes in MAC addresses for same IP.
+
+Step 5: Capture ARP Packets
+sudo tcpdump -n -e -i <interface> arp
+
+Indicators of ARP spoofing:
+- Multiple ARP replies without requests
+- Gateway IP mapping to unusual MAC addresses
+
+Step 6: Wireshark Analysis
+filter: arp
+
+Look for duplicate IP and unsolicited ARP replies.
+
+Step 7: Test HTTP vs HTTPS Security
+Compare unencrypted and encrypted traffic:
+
+curl -v http://example.com
+curl -v https://example.com
+
+Discuss how HTTPS prevents MITM attacks.
+
+Step 8: Continuous Monitoring with arpwatch
+
+sudo systemctl enable --now arpwatch@<interface>.service
+journalctl -u arpwatch@<interface>.service -f
+
+Observe new MAC and IP changes.
+
+Step 9: Network Scanning
+Run a ping sweep:
+
+nmap -sn 192.168.0.0/24
+
+Compare results with your expected network map.
+
+Step 10: Static ARP Entry (Defense)
+Get gateway IP and MAC:
+
+ip route | grep default
+ip neigh show | grep <gateway_ip>
+
+Set static entry:
+sudo ip neigh replace <gateway_ip> lladdr <gateway_mac> nud permanent dev <interface>
+
+Remove static entry:
+sudo ip neigh del <gateway_ip> dev <interface>
