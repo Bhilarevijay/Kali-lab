@@ -1,0 +1,56 @@
+sudo apt install -y git python3-virtualenv
+
+2. Create user and get Cowrie
+sudo adduser --disabled-password cowrie
+sudo su - cowrie
+git clone https://github.com/cowrie/cowrie.git
+cd cowrie
+
+
+3. Setup environment
+virtualenv --python=python3 cowrie-env
+source cowrie-env/bin/activate
+
+4. Install requirements
+pip install -r requirements.txt
+
+5. Install in development mode (SOLUTION 1 - CREATES bin/cowrie)
+pip install -e .
+
+6. Quick config
+cd etc/
+cp cowrie.cfg.dist cowrie.cfg
+cp userdb.example userdb.txt
+echo "root:password123" >> userdb.txt
+cd ..
+
+
+# 7. Start honeypot (NOW bin/cowrie EXISTS)
+bin/cowrie start
+
+TROUBLESHOOT ISSUES:
+Problem: Missing bin/cowrie Script
+Symptoms: bin/cowrie: No such file or directory
+ls -la # Check directory structure
+ls -la bin/ # Verify script existence
+Solution 1: Development Installation
+pip install -e . # Creates required scripts
+Solution 2: Manual Script Creation
+cat > bin/cowrie << 'EOF'
+#!/usr/bin/env python3
+from cowrie.scripts import cowrie
+if __name__ == '__main__':
+cowrie.main()
+EOF
+chmod +x bin/cowrie
+
+
+# 8. In NEW terminal, test the honeypot
+ssh root@localhost -p 2222 # Password: password123
+
+You will be asked something like this…..
+Are you sure you want to continue connecting (yes/no/[fingerprint])? TYPE YES
+try normal kali linux commands (whoami, pwd. Ls, uname -a)
+
+# 9. Back in honeypot terminal, check logs
+tail -f var/log/cowrie/cowrie.log

